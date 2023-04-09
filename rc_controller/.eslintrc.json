@@ -1,0 +1,23 @@
+{
+    "extends": [
+        "eslint:recommended",
+        "plugin:@typescript-eslint/recommended",
+        "plugin:react-native/recommended",
+        "pluging:react-native/recommended",
+        "prettier",
+        "plugin:prettier/recommended"
+    ],
+    "plugins": [
+        "@typescript-eslint",
+        "react",
+        "react-native",
+        "prettier"
+    ],
+    "parser": "@typescript-eslint/parser",
+    "parserOptions": {
+        "project": true
+    },
+    "rules": {
+        "prettier/prettier": "warn"
+    }
+}
