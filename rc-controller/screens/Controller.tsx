@@ -1,7 +1,7 @@
-import { View, Text } from 'react-native';
+import {Text} from 'react-native';
 
 const Controller = () => {
-    return <Text>Hello, World!</Text>;
+    return <Text>Controller</Text>;
 };
 
 export default Controller;
