@@ -1,4 +1,3 @@
-import {useState} from 'react';
 import {Pressable, Text} from 'react-native';
 
 import {BluetoothDevice} from 'react-native-bluetooth-classic';

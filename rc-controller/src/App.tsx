@@ -1,5 +1,6 @@
 import {useState, useEffect} from 'react';
 import {StatusBar, PermissionsAndroid} from 'react-native';
+
 import RNBluetoothClassic, {
     BluetoothDevice,
 } from 'react-native-bluetooth-classic';
@@ -37,10 +38,11 @@ const requestBluetoothPermission = async (): Promise<boolean> => {
 
 const App = () => {
     const [isChoosingDevice, setIsChoosingDevice] = useState(false);
-    const [isConnected, setIsConnected] = useState(false);
     const [availableDevices, setAvailableDevices] = useState<BluetoothDevice[]>(
         [],
     );
+    const [connectedDevice, setConnectedDevice] =
+        useState<BluetoothDevice | null>(null);
 
     useEffect(() => {
         (async () => {
@@ -69,33 +71,60 @@ const App = () => {
         })();
     }, []);
 
-    const setSelectedDevice = async (device: DeviceAddress) => {
-        console.info('Trying to connect to device with address: ', device);
+    const setSelectedDevice = async (deviceAddress: DeviceAddress) => {
+        console.info(
+            'Trying to connect to device with address: ',
+            deviceAddress,
+        );
 
-        try {
-            await RNBluetoothClassic.connectToDevice(device);
-        } catch (e) {
-            console.error(e);
-        }
+        let device = await (async (): Promise<BluetoothDevice | null> => {
+            try {
+                return await RNBluetoothClassic.connectToDevice(deviceAddress);
+            } catch (e) {
+                console.error(e);
+                return null;
+            }
+        })();
+
+        if (!device) return;
+
+        console.info('Connected!');
+        setIsChoosingDevice(false);
+        setConnectedDevice(device);
     };
 
-    const renderScreen = (isConnected: boolean, isChoosingDevice: boolean) => {
-        if (!isConnected && isChoosingDevice) {
+    const handleDisconnect = () => {
+        setConnectedDevice(null);
+        setIsChoosingDevice(true);
+    };
+
+    const renderScreen = (
+        connectedDevice: BluetoothDevice | null,
+        isChoosingDevice: boolean,
+    ) => {
+        if (!connectedDevice && isChoosingDevice) {
             return (
                 <DeviceSelector
                     devices={availableDevices}
                     setSelectedDevice={setSelectedDevice}
                 />
             );
-        } else if (!isConnected && !isChoosingDevice) {
+        } else if (!connectedDevice && !isChoosingDevice) {
             return <NotConnected />;
-        } else if (isConnected) {
+        } else if (connectedDevice) {
             if (isChoosingDevice) {
+                console.debug(connectedDevice);
+
                 throw Error(
                     'State connected and choosing device should be unreachable',
                 );
             }
-            return <Controller />;
+            return (
+                <Controller
+                    device={connectedDevice}
+                    handleDisconnect={handleDisconnect}
+                />
+            );
         } else {
             throw Error('Connection state case not handled');
         }
@@ -104,7 +133,7 @@ const App = () => {
     return (
         <>
             <StatusBar barStyle="dark-content" />
-            {renderScreen(isConnected, isChoosingDevice)}
+            {renderScreen(connectedDevice, isChoosingDevice)}
         </>
     );
 };
