@@ -135,6 +135,9 @@ void loop() {
   }
 
   while (hc05.available()) {
-    const RcCommand command = char_to_rc_commands(hc05.read());
+    const char in_char = hc05.read();
+    const RcCommand command = char_to_rc_commands(in_char);
+
+    Serial.println(String() + "Command received: `" + in_char + "`.");
   }
 }
