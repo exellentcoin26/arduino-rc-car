@@ -1,6 +1,7 @@
-import {Pressable, Text} from 'react-native';
+import {Pressable, Text, View} from 'react-native';
 
 import {BluetoothDevice} from 'react-native-bluetooth-classic';
+import Controller from './Controller';
 
 export type DeviceId = string;
 export type DeviceAddress = string;

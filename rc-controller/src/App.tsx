@@ -4,6 +4,7 @@ import {StatusBar, PermissionsAndroid} from 'react-native';
 import RNBluetoothClassic, {
     BluetoothDevice,
 } from 'react-native-bluetooth-classic';
+import {GestureHandlerRootView} from 'react-native-gesture-handler';
 
 import NotConnected from './screens/NotConnected';
 import Controller from './screens/Controller';
@@ -133,7 +134,9 @@ const App = () => {
     return (
         <>
             <StatusBar barStyle="dark-content" />
-            {renderScreen(connectedDevice, isChoosingDevice)}
+            <GestureHandlerRootView>
+                {renderScreen(connectedDevice, isChoosingDevice)}
+            </GestureHandlerRootView>
         </>
     );
 };

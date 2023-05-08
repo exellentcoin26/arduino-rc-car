@@ -1,12 +1,11 @@
-import {useState, useEffect} from 'react';
-import {Text, View, PanResponder, StyleSheet} from 'react-native';
+import {useEffect} from 'react';
+import {View, StyleSheet} from 'react-native';
 
-import RNBluetoothClassic, {
-    BluetoothDevice,
-} from 'react-native-bluetooth-classic';
+import {BluetoothDevice} from 'react-native-bluetooth-classic';
 import Orientation from 'react-native-orientation-locker';
 
-const handleMove = async () => {};
+import Joystick from '../components/Joystick';
+import CarController from '../models/car';
 
 const Controller = ({
     device,
@@ -19,56 +18,46 @@ const Controller = ({
         Orientation.lockToLandscape();
     }, []);
 
-    const [frontBackJoystickPos, setFrontBackJoystickPos] = useState(0);
-    const [leftRightJoystickPos, setLeftRightJoystickPos] = useState(0);
+    const carController = new CarController(device, 0, 0);
 
-    const frontBackJoystickResponder = PanResponder.create({
-        onStartShouldSetPanResponder: () => true,
-        onPanResponderMove: (_evt, gestureState) => {
-            if (frontBackJoystickPos !== gestureState.dy)
-                setFrontBackJoystickPos(frontBackJoystickPos + gestureState.dy);
-        },
-        onPanResponderRelease: () => {
-            setFrontBackJoystickPos(0);
-        },
-    });
+    const handleHorizontalMove = (x: number) => {
+        carController.setX(x);
+    };
+    const handleVerticalMove = (y: number) => {
+        carController.setY(y);
+    };
 
     return (
-        <>
-            <View style={styles.container}>
-                <View
-                    {...frontBackJoystickResponder.panHandlers}
-                    style={[
-                        styles.joystick,
-                        {
-                            transform: [{translateY: frontBackJoystickPos}],
-                        },
-                    ]}></View>
+        <View style={style.controller}>
+            <View style={style.directionContainer}>
+                <Joystick
+                    direction={'vertical'}
+                    stickSize={100}
+                    sliderSize={300}
+                    handleMove={handleVerticalMove}
+                />
             </View>
-        </>
+            <View style={style.directionContainer}>
+                <Joystick
+                    direction={'horizontal'}
+                    stickSize={100}
+                    sliderSize={300}
+                    handleMove={handleHorizontalMove}
+                />
+            </View>
+        </View>
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
+const style = StyleSheet.create({
+    controller: {
+        height: '100%',
+        flexDirection: 'row',
+    },
+    directionContainer: {
         flex: 1,
-        alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: '#555',
-    },
-    joystickContainer: {
-        width: 100,
-        height: 100,
-        borderWidth: 1,
-        borderRadius: 50,
         alignItems: 'center',
-        justifyContent: 'center',
-    },
-    joystick: {
-        width: 50,
-        height: 50,
-        borderRadius: 25,
-        backgroundColor: 'white',
     },
 });
 
