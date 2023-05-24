@@ -1,5 +1,4 @@
 #include <SoftwareSerial.h>
-// #include <ArduinoSTL.h>
 
 const u32 console_baud = 9600;
 
@@ -62,28 +61,28 @@ struct Heading {
     None,
   };
 
-  Direction horizontal;
-  Direction vertical;
+  Direction horizontal{ Direction::None };
+  Direction vertical{ Direction::None };
 
   void apply_command(RcCommand command) {
     switch (command) {
       case RcCommand::Left:
-        horizontal = Direction::Left;
+        this->horizontal = Direction::Left;
         break;
       case RcCommand::Right:
-        horizontal = Direction::Right;
+        this->horizontal = Direction::Right;
         break;
       case RcCommand::Forward:
-        vertical = Direction::Forward;
+        this->vertical = Direction::Forward;
         break;
       case RcCommand::Backward:
-        vertical = Direction::Backward;
+        this->vertical = Direction::Backward;
         break;
       case RcCommand::RelHor:
-        horizontal = Direction::None;
+        this->horizontal = Direction::None;
         break;
       case RcCommand::RelVer:
-        vertical = Direction::None;
+        this->vertical = Direction::None;
         break;
       default:
         // do nothing for `RcCommand::None`
@@ -100,9 +99,11 @@ struct Heading {
       "none"
     };
 
-    Serial.println(String() + direction[static_cast<u32>(vertical)] + "|" + direction[static_cast<u32>(horizontal)]);
+    Serial.println(String() + direction[static_cast<u32>(this->vertical)] + " | " + direction[static_cast<u32>(this->horizontal)]);
   }
 };
+
+Heading heading{};
 
 void setup() {
   // setup communication with serial monitor
@@ -134,10 +135,14 @@ void loop() {
     return;
   }
 
+
   while (hc05.available()) {
     const char in_char = hc05.read();
     const RcCommand command = char_to_rc_commands(in_char);
 
+    // print received command
     Serial.println(String() + "Command received: `" + in_char + "`.");
+
+    heading.apply_command(command);
   }
 }

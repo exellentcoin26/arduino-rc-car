@@ -4,6 +4,7 @@ class CarController {
     x: number;
     y: number;
     car: BluetoothDevice;
+    handleDisconnect: () => void;
 
     directionCommands = {
         forward: 'f',
@@ -22,11 +23,18 @@ class CarController {
         vertical: 'releaseVertical',
     };
 
-    constructor(device: BluetoothDevice, x: number = 0, y: number = 0) {
+    constructor(
+        device: BluetoothDevice,
+        x: number = 0,
+        y: number = 0,
+        disconnectHandler: () => void,
+    ) {
         this.x = x;
         this.y = y;
 
         this.car = device;
+
+        this.handleDisconnect = disconnectHandler;
     }
 
     private handlePositionChange(newX: number, newY: number) {
@@ -41,7 +49,7 @@ class CarController {
                 this.move(newDirection);
 
             this.currentDirection['horizontal'] = newDirection;
-            this.y = newY;
+            this.x = newX;
         }
 
         // console.debug(newY);
@@ -81,7 +89,14 @@ class CarController {
             | 'releaseHorizontal',
     ) {
         const command = this.directionCommands[direction];
+
         console.debug(`Sending command: \`${command}\``);
+
+        // check if car is still connected
+        this.car.isConnected().then(c => {
+            if (!c) this.handleDisconnect();
+        });
+
         this.car
             .write(this.directionCommands[direction])
             .then(() =>

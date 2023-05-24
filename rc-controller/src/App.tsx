@@ -7,6 +7,7 @@ import RNBluetoothClassic, {
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
 
 import NotConnected from './screens/NotConnected';
+import IsConnecting from './screens/IsConnecting';
 import Controller from './screens/Controller';
 import {
     DeviceAddress,
@@ -44,6 +45,7 @@ const App = () => {
     );
     const [connectedDevice, setConnectedDevice] =
         useState<BluetoothDevice | null>(null);
+    const [isConnecting, setIsConnecting] = useState<boolean>(false);
 
     useEffect(() => {
         (async () => {
@@ -78,6 +80,7 @@ const App = () => {
             deviceAddress,
         );
 
+        setIsConnecting(true);
         let device = await (async (): Promise<BluetoothDevice | null> => {
             try {
                 return await RNBluetoothClassic.connectToDevice(deviceAddress);
@@ -86,6 +89,8 @@ const App = () => {
                 return null;
             }
         })();
+
+        setIsConnecting(false);
 
         if (!device) return;
 
@@ -104,12 +109,16 @@ const App = () => {
         isChoosingDevice: boolean,
     ) => {
         if (!connectedDevice && isChoosingDevice) {
-            return (
-                <DeviceSelector
-                    devices={availableDevices}
-                    setSelectedDevice={setSelectedDevice}
-                />
-            );
+            if (isConnecting) {
+                return <IsConnecting />;
+            } else {
+                return (
+                    <DeviceSelector
+                        devices={availableDevices}
+                        setSelectedDevice={setSelectedDevice}
+                    />
+                );
+            }
         } else if (!connectedDevice && !isChoosingDevice) {
             return <NotConnected />;
         } else if (connectedDevice) {

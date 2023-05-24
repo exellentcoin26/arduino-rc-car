@@ -18,7 +18,7 @@ const Controller = ({
         Orientation.lockToLandscape();
     }, []);
 
-    const carController = new CarController(device, 0, 0);
+    const carController = new CarController(device, 0, 0, handleDisconnect);
 
     const handleHorizontalMove = (x: number) => {
         carController.setX(x);
