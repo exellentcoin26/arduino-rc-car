@@ -9,6 +9,12 @@ const u32 hc05_tx = 3;
 const u32 hc05_state = 4;
 const u32 hc05_baud = 9600;
 
+// car motor pins
+const u32 forward_motor = 8;
+const u32 backward_motor = 9;
+const u32 left_motor = 12;
+const u32 right_motor = 11;
+
 SoftwareSerial hc05(hc05_rx, hc05_tx);
 
 // is the hc05 connected to a device
@@ -101,6 +107,44 @@ struct Heading {
 
     Serial.println(String() + direction[static_cast<u32>(this->vertical)] + " | " + direction[static_cast<u32>(this->horizontal)]);
   }
+
+  void output_direction() const {
+    switch (this->vertical) {
+      case Direction::Forward:
+        digitalWrite(backward_motor, LOW);
+        digitalWrite(forward_motor, HIGH);
+        break;
+      case Direction::Backward:
+        digitalWrite(forward_motor, LOW);
+        digitalWrite(backward_motor, HIGH);
+        break;
+      case Direction::None:
+        digitalWrite(forward_motor, LOW);
+        digitalWrite(backward_motor, LOW);
+        break;
+      default:
+        Serial.println("Illegal vertical direction received");
+        break;
+    }
+
+    switch (this->horizontal) {
+      case Direction::Left:
+        digitalWrite(right_motor, LOW);
+        digitalWrite(left_motor, HIGH);
+        break;
+      case Direction::Right:
+        digitalWrite(left_motor, LOW);
+        digitalWrite(right_motor, HIGH);
+        break;
+      case Direction::None:
+        digitalWrite(left_motor, LOW);
+        digitalWrite(right_motor, LOW);
+        break;
+      default:
+        Serial.println("Illegal horizontal direction received");
+        break;
+    }
+  }
 };
 
 Heading heading{};
@@ -116,6 +160,12 @@ void setup() {
   pinMode(hc05_rx, INPUT);
   pinMode(hc05_tx, OUTPUT);
   hc05.begin(hc05_baud);
+
+  // setup motor pins
+  pinMode(forward_motor, OUTPUT);
+  pinMode(backward_motor, OUTPUT);
+  pinMode(left_motor, OUTPUT);
+  pinMode(left_motor, OUTPUT);
 
   Serial.println("HC-05 ready to connect (default password: 1234)");
 }
@@ -144,5 +194,6 @@ void loop() {
     Serial.println(String() + "Command received: `" + in_char + "`.");
 
     heading.apply_command(command);
+    heading.output_direction();
   }
 }
